@@ -15,17 +15,17 @@ Dokumen ini merangkum konteks percakapan untuk melanjutkan perencanaan tugas akh
 
 ## Usulan topik kerja
 
-**Optimasi Keputusan Handover Berbasis Random Forest untuk Mengurangi Ping-Pong dan Gangguan Video Streaming pada Testbed 5G Standalone Dua Sel.**
+**Perancangan dan Evaluasi Supervisory Agent untuk Adaptasi Parameter Handover pada Testbed 5G Standalone.**
 
-Pertanyaan penelitian kerja: pada testbed 5G SA dua sel, apakah keputusan Random Forest yang menyarankan UE tetap di sel saat ini atau pindah ke sel tetangga dapat mengurangi ping-pong dan gangguan video dibandingkan baseline handover A3 yang telah dituning, tanpa meningkatkan handover gagal atau radio link failure?
+Pertanyaan penelitian kerja: pada testbed 5G SA dua sel, apakah supervisory agent yang mengolah telemetri teragregasi dan mengusulkan perubahan parameter dari ruang aksi terbatas dapat memperbaiki tradeoff antara handover terlambat, ping-pong, RLF, dan pemulihan trafik dibandingkan baseline A3 statis, dengan validator deterministik dan rollback?
 
-Nilai pengguna yang ingin ditunjukkan: apakah video lebih jarang atau lebih sebentar buffering saat koneksi berpindah sel. Ping-pong handover adalah perpindahan sel A→B lalu kembali B→A dalam jendela waktu singkat; ini bukan ping jaringan dan bukan nama lain untuk video tersendat. Ukur ping-pong dan buffering secara terpisah.
+Nilai pengguna yang ingin ditunjukkan: koneksi lebih stabil dan trafik lebih cepat pulih saat UE berpindah sel. Ping-pong handover adalah perpindahan sel A→B lalu kembali B→A dalam jendela waktu singkat; ini bukan ping jaringan dan bukan nama lain untuk video tersendat. Ukur ping-pong dan gangguan trafik secara terpisah.
 
-## Kenapa Random Forest sebagai metode awal
+## Posisi supervisory agent
 
-Random Forest menggabungkan prediksi banyak pohon keputusan melalui voting. Ia praktis sebagai baseline ML untuk data pengukuran berbentuk tabel dan relatif ringan dibanding deep reinforcement learning. Contoh kandidat fitur: RSRP sel serving dan neighbor, perbedaan serta tren pengukuran; RSRQ/SINR hanya jika tersedia stabil. Keluaran awal dibatasi menjadi “tetap” atau “handover”.
+Supervisory agent diposisikan sebagai lapisan pengawas yang menganalisis telemetri dan mengusulkan perubahan parameter handover, bukan pengendali bebas yang menulis atau menyuntikkan skrip ke jaringan. Perubahan dipilih dari ruang aksi terbatas, diperiksa validator deterministik, dicatat, dan dapat dibatalkan. Hermes Harness/API—jika dipakai—merupakan alat implementasi, bukan klaim framework akademik tersendiri.
 
-Model perlu dilatih dari data yang memiliki label yang dirancang dengan benar. Jangan sekadar memberi label mengikuti keputusan A3 bila tujuan penelitian adalah menguji nilai tambah model. Kumpulkan data percobaan terkendali, pisahkan train/test berdasarkan sesi atau lintasan, bekukan model saat pengujian, dan evaluasi keputusan yang benar-benar dijalankan. Agar realistis, lakukan inferensi/rekomendasi offline terlebih dahulu; closed-loop hanya bila stack RAN menyediakan jalur kendali handover yang dapat diverifikasi.
+Loop agen ditempatkan pada skala supervisory, bukan pada setiap event handover, karena API dapat memiliki latensi, biaya, kegagalan koneksi, dan keluaran yang tidak deterministik. Pengujian dimulai dalam mode rekomendasi/offline; closed-loop hanya dilakukan bila stack RAN menyediakan jalur kendali yang dapat diverifikasi dan baseline handover sudah stabil.
 
 ## Risiko kelayakan yang perlu diuji pertama
 
@@ -33,12 +33,12 @@ Hambatan utama TA bukan algoritma, melainkan memastikan handover standar berulan
 
 Tutorial resmi srsRAN yang dirujuk menunjukkan contoh intra-gNB menggunakan dua sel di bawah satu CU-CP dan menyatakan tutorial tersebut menggunakan X310; tutorial itu menyebut perangkat B200-series tidak cocok untuk use case spesifiknya. Itu bukan bukti bahwa setiap kemungkinan konfigurasi B210+B205 pasti gagal atau berhasil. Uji konfigurasi aktual sejak bulan pertama dan jangan menjadikan kontrol AI closed-loop sebagai asumsi sebelum baseline handover berhasil.
 
-Rencana waktu enam bulan: (1) kunci arsitektur, versi software dan attach 5G SA; (2) capai handover non-AI berulang dengan UE target dan log; (3) kumpulkan data serta tune baseline A3; (4) latih/validasi Random Forest; (5) uji pembanding dan layanan video; (6) analisis, dokumentasi, dan demonstrasi. Jika handover standar belum stabil di akhir bulan kedua, sederhanakan ruang lingkup atau revisi stack bersama pembimbing.
+Rencana waktu enam bulan: (1) kunci arsitektur, versi software dan attach 5G SA; (2) capai handover non-AI berulang dengan UE target dan log; (3) kumpulkan telemetri serta tetapkan baseline A3; (4) bangun validator, fallback, dan supervisory agent; (5) uji perbandingan serta trafik data/video; (6) analisis, dokumentasi, dan demonstrasi. Jika handover standar belum stabil di akhir bulan kedua, sederhanakan ruang lingkup atau revisi stack bersama pembimbing.
 
 Metrik yang disarankan:
 - Mobilitas: jumlah HO, ping-pong dalam jendela yang ditetapkan, HO success/failure, RLF, waktu keputusan dan waktu sampai trafik pulih.
 - Pengalaman video/data: jumlah dan total durasi stall/buffering, packet loss, throughput aplikasi.
-- Model: precision/recall/F1, false HO, keputusan terlambat, latensi inferensi.
+- Agen: validitas usulan, jumlah usulan ditolak validator, latensi, biaya API, reproducibility, dan keberhasilan rollback.
 
 Gunakan satu UE utama, server video lokal, dan konfigurasi player/buffer yang tetap. Jika video tidak buffering pada semua metode, laporkan hasil itu dengan jujur dan gunakan gangguan trafik/throughput sebagai metrik pendamping; jangan mengklaim peningkatan QoE video tanpa bukti.
 
@@ -51,6 +51,8 @@ Gunakan satu UE utama, server video lokal, dan konfigurasi player/buffer yang te
 5. M. Helmy et al., “Autoformer-Based Mobility and Handoff-Aware Prediction for QoE Enhancement in Adaptive Video Streaming in 4G/5G Networks,” *Journal of Network and Computer Applications*, 243, 104324, 2025. https://doi.org/10.1016/j.jnca.2025.104324
 6. M. J. Sanjarani et al., “Handover Reduction in 5G Mobile Networks Using Ensemble Learning Method,” *Scientific Reports*, 2026. https://doi.org/10.1038/s41598-026-73269-1. Artikel tercatat terbit 26 September 2026 sebagai versi awal yang dapat diperbarui menuju Version of Record; verifikasi versi final sebelum mengutip hasil rinci.
 7. M. S. Mollel et al., “A Survey of Machine Learning Applications to Handover Management in 5G and Beyond,” *IEEE Access*, 9, 45770–45802, 2021. https://doi.org/10.1109/ACCESS.2021.3067503
+8. M. Polese et al., “Understanding O-RAN: Architecture, Interfaces, Algorithms, Security, and Research Challenges,” *IEEE Communications Surveys & Tutorials*, 25(2), 1376–1411, 2023. https://doi.org/10.1109/COMST.2023.3239220
+9. L. Wang et al., “A Survey on Large Language Model Based Autonomous Agents,” *Frontiers of Computer Science*, 18, 186345, 2024. https://doi.org/10.1007/s11704-024-40231-1
 
 Sumber teknis yang dirujuk: dokumentasi Open5GS https://open5gs.org/open5gs/docs/ ; tutorial handover srsRAN https://docs.srsran.com/projects/project/en/latest/tutorials/source/handover/source/index.html ; rilis srsRAN https://github.com/srsran/srsRAN_Project/releases ; diskusi komunitas srsRAN tentang CU/DU https://github.com/srsran/srsRAN_Project/discussions/827 ; tutorial handover OAI https://github.com/OPENAIRINTERFACE/openairinterface5g/blob/develop/doc/handover-tutorial.md ; manual USRP B2x0 https://files.ettus.com/manual/page_usrp_b200.html .
 
@@ -59,16 +61,18 @@ Sumber untuk penjelasan istilah: dokumentasi RandomForestClassifier scikit-learn
 ## Berkas hasil sebelumnya
 
 - Analisis PDF: `Analisis_Topik_TA_Handover_AI_5G_SA.pdf`
-- Formulir DOCX: `LKS_Usulan_Topik_Capstone_Handover_5G_SA.docx`
+- Formulir DOCX lama: `LKS_Usulan_Topik_Capstone_Handover_5G_SA.docx`
+- Formulir DOCX revisi: `LKS_Usulan_Topik_Capstone_Supervisory_Agent_5G_SA.docx`
 
-Keduanya berada di folder `outputs` pada workspace sesi asal.
+Analisis dan formulir lama berada di folder `outputs` pada workspace sesi asal; formulir revisi tercatat di root repository ini.
 
 ## Langkah berikutnya yang paling berguna
 
 1. Konfirmasi model USRP kedua dengan tepat (B205mini-i atau model lain) serta konfigurasi clock/reference yang tersedia.
 2. Putuskan satu arsitektur radio dan satu jenis handover yang benar-benar didukung.
-3. Validasi attach 5G SA, neighbor measurements, handover standar, dan aliran IP/video sebelum mengembangkan model ML.
-4. Tinjau kembali setiap publikasi dari halaman penerbit/DOI dan perluas pencarian sistematis sebelum menetapkan klaim novelty proposal.
+3. Validasi attach 5G SA, neighbor measurements, handover standar, dan aliran IP/video sebelum mengembangkan agent.
+4. Verifikasi jalur kontrol parameter dinamis, telemetry/KPM, dan dukungan RIC/E2 pada versi stack aktual.
+5. Tinjau kembali setiap publikasi dari halaman penerbit/DOI dan perluas pencarian sistematis sebelum menetapkan klaim novelty proposal.
 
 
 ## Preferensi sinkronisasi untuk kelanjutan
