@@ -69,3 +69,8 @@ Keduanya berada di folder `outputs` pada workspace sesi asal.
 2. Putuskan satu arsitektur radio dan satu jenis handover yang benar-benar didukung.
 3. Validasi attach 5G SA, neighbor measurements, handover standar, dan aliran IP/video sebelum mengembangkan model ML.
 4. Tinjau kembali setiap publikasi dari halaman penerbit/DOI dan perluas pencarian sistematis sebelum menetapkan klaim novelty proposal.
+
+
+## Preferensi sinkronisasi untuk kelanjutan
+
+Pengguna meminta agar percakapan lanjutan di thread ini disinkronkan ke repositori `https://github.com/Neiljustiin/Codex-Cloud` agar dapat diteruskan dari perangkat lain. Setelah ada pesan baru yang menambah keputusan, konteks, atau hasil yang perlu dibawa ke sesi berikutnya, perbarui catatan ini dengan ringkasan dan push perubahan ke repositori yang sama. Jangan salin transkrip mentah; catat hanya informasi yang membantu kelanjutan TA dan perubahan statusnya. Jika sesi baru tidak memiliki riwayat percakapan ini, mulai dengan membaca file ini. Pembaruan dilakukan sebagai bagian dari giliran kerja, bukan sinkronisasi otomatis di latar belakang.
