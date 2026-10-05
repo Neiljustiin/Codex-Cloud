@@ -74,3 +74,8 @@ Keduanya berada di folder `outputs` pada workspace sesi asal.
 ## Preferensi sinkronisasi untuk kelanjutan
 
 Pengguna meminta agar percakapan lanjutan di thread ini disinkronkan ke repositori `https://github.com/Neiljustiin/Codex-Cloud` agar dapat diteruskan dari perangkat lain. Setelah ada pesan baru yang menambah keputusan, konteks, atau hasil yang perlu dibawa ke sesi berikutnya, perbarui catatan ini dengan ringkasan dan push perubahan ke repositori yang sama. Jangan salin transkrip mentah; catat hanya informasi yang membantu kelanjutan TA dan perubahan statusnya. Jika sesi baru tidak memiliki riwayat percakapan ini, mulai dengan membaca file ini. Pembaruan dilakukan sebagai bagian dari giliran kerja, bukan sinkronisasi otomatis di latar belakang.
+
+
+## Kendala menemukan repositori dari perangkat lain
+
+Pada 5 Oktober 2026, pemilih “Create a cloud environment” di perangkat lain menampilkan akun GitHub `Neiljustiin`, tetapi daftar repo hanya berisi `adaptivenetworklab/NetFlux5G`; `Neiljustiin/Codex-Cloud` tidak muncul. Repo Codex-Cloud sudah public dan memiliki branch `main` serta file catatan ini. Dugaan utama: instalasi GitHub app/connector untuk Codex belum diberi akses ke repo tersebut, atau daftar belum disegarkan setelah repo baru dibuat. Langkah pemeriksaan: buka “Configure access”, pastikan akses mencakup `Neiljustiin/Codex-Cloud`, simpan, kembali ke pemilih dan tekan “Refresh”; jika baru saja dibuat, tunggu beberapa menit lalu refresh. Setelah repo muncul, pilih repo itu dan selesaikan pembuatan/penerbitan cloud environment. Koneksi akun GitHub saja belum berarti setiap repo sudah dipilih atau cloud environment sudah dibuat.
